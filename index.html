@@ -8,9 +8,7 @@
 </head>
 <body>
 
-<div id="pdfContainer" style="width: 100%; height: 600px;">
-    <!-- El visor de PDF se cargará aquí -->
-</div>
+<div id="pdfContainer" style="width: 100%; height: 600px;"></div>
 
 <script>
     var urlPDF;
@@ -18,46 +16,38 @@
     function cargarPDF() {
         var anchoVentana = window.innerWidth;
 
-        // Detectar el dispositivo y seleccionar el PDF correspondiente
         if(anchoVentana < 768) { // Móvil
-            //urlPDF = 'mobile.pdf'; // Cambia esta URL
-            urlPdf = 'https://www.princexml.com/samples/invoice/invoicesample.pdf';
+            urlPDF = 'https://cbmella.github.io/fresenius.github.io/mobile.pdf'; // Asegúrate de usar una URL accesible
         } else if(anchoVentana >= 768 && anchoVentana < 1024) { // Tableta
-            urlPDF = 'tablet.pdf'; // Cambia esta URL
+            urlPDF = 'https://cbmella.github.io/fresenius.github.io/tablet.pdf'; // Asegúrate de usar una URL accesible
         } else { // Escritorio
-            urlPDF = 'desktop.pdf'; // Cambia esta URL
+            urlPDF = 'https://cbmella.github.io/fresenius.github.io/desktop.pdf'; // Asegúrate de usar una URL accesible
         }
 
-        // Usar PDF.js para cargar el PDF
-        pdfjsLib.getDocument(urlPDF).promise.then(function(pdf) {
-            pdf.getPage(1).then(function(page) {
-                var scale = 1.5;
-                var viewport = page.getViewport({scale: scale});
-
-                // Preparar el lienzo usando el tamaño del viewport del PDF
+        // Asegurarse de que PDF.js use una URL correcta y accesible
+        pdfjsLib.getDocument({url: urlPDF}).promise.then(function(pdfDoc) {
+            pdfDoc.getPage(1).then(function(page) {
+                var viewport = page.getViewport({scale: 1.5});
                 var canvas = document.createElement('canvas');
-                var context = canvas.getContext('2d');
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-
-                // Renderizar la página PDF en el lienzo
+                var ctx = canvas.getContext('2d');
                 var renderContext = {
-                    canvasContext: context,
+                    canvasContext: ctx,
                     viewport: viewport
                 };
-                var renderTask = page.render(renderContext);
-                renderTask.promise.then(function() {
-                    document.getElementById('pdfContainer').innerHTML = ''; // Limpia el contenedor antes de añadir el nuevo canvas
-                    document.getElementById('pdfContainer').appendChild(canvas);
-                });
+
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                document.getElementById('pdfContainer').innerHTML = '';
+                document.getElementById('pdfContainer').appendChild(canvas);
+
+                page.render(renderContext);
             });
+        }).catch(function(error) {
+            console.error('Error al cargar el PDF: ', error);
         });
     }
 
-    // Cargar el PDF al cargar la página
     window.onload = cargarPDF;
-
-    // Opcional: Volver a cargar el PDF si se cambia el tamaño de la ventana
     window.onresize = function() {
         document.getElementById('pdfContainer').innerHTML = ''; // Limpiar el contenedor
         cargarPDF();
@@ -66,4 +56,5 @@
 
 </body>
 </html>
+
 
