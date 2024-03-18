@@ -63,8 +63,9 @@
             pdfjsLib.getDocument(urlPDF).promise.then(function (pdf) {
                 for (var i = 1; i <= pdf.numPages; i++) {
                     pdf.getPage(i).then(function (page) {
-                        var scale = 0.5;
-                        var viewport = page.getViewport({ scale: scale });
+                        var anchoVentana = window.innerWidth;
+                        var escala = anchoVentana / page.getViewport({ scale: 1 }).width;
+                        var viewport = page.getViewport({ scale: escala });
                         var canvas = document.createElement('canvas');
                         var context = canvas.getContext('2d');
                         canvas.height = viewport.height;
