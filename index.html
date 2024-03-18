@@ -76,7 +76,23 @@
                             canvasContext: context,
                             viewport: viewport
                         };
-                        page.render(renderContext);
+                        page.render(renderContext).promise.then(function () {
+                            page.getAnnotations().then(function (annotations) {
+                                annotations.forEach(function (annotation) {
+                                    if (annotation.subtype === 'Link') {
+                                        var link = document.createElement('a');
+                                        link.href = annotation.url;
+                                        link.target = '_blank';
+                                        link.style.position = 'absolute';
+                                        link.style.left = annotation.rect[0] + 'px';
+                                        link.style.top = annotation.rect[1] + 'px';
+                                        link.style.width = annotation.rect[2] - annotation.rect[0] + 'px';
+                                        link.style.height = annotation.rect[3] - annotation.rect[1] + 'px';
+                                        pdfContainer.appendChild(link);
+                                    }
+                                });
+                            });
+                        });
                     });
                 }
             });
