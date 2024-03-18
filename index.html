@@ -29,78 +29,36 @@
 <body>
     <div id="pdfContainer"></div>
 
-    <script>
-        var urlPDF;
+<script>
+    var urlPDF;
 
-        function cargarPDF() {
-            var anchoVentana = window.innerWidth;
+    function cargarPDF() {
+        var anchoVentana = window.innerWidth;
 
-            if (anchoVentana < 768) { // Móvil
-                urlPDF = '03.pdf';
-                mostrarPDFConPDFJS();
-            } else if (anchoVentana >= 768 && anchoVentana < 1024) { // Tableta
-                if (window.orientation === 0 || window.orientation === 180) { // Vertical
-                    urlPDF = '01.pdf';
-                } else { // Horizontal
-                    urlPDF = '01.pdf';
-                }
-                mostrarPDFEnIframe();
-            } else { // Escritorio
+        if (anchoVentana < 768) { // Móvil
+            urlPDF = '03.pdf';
+            mostrarPDFEnIframe();
+        } else if (anchoVentana >= 768 && anchoVentana < 1024) { // Tableta
+            if (window.orientation === 0 || window.orientation === 180) { // Vertical
                 urlPDF = '01.pdf';
-                mostrarPDFEnIframe();
+            } else { // Horizontal
+                urlPDF = '01.pdf';
             }
+            mostrarPDFEnIframe();
+        } else { // Escritorio
+            urlPDF = '01.pdf';
+            mostrarPDFEnIframe();
         }
+    }
 
-        function mostrarPDFEnIframe() {
-            var pdfContainer = document.getElementById('pdfContainer');
-            pdfContainer.innerHTML = '<iframe src="' + urlPDF + '#view=fitH" frameborder="0" allowfullscreen></iframe>';
-        }
+    function mostrarPDFEnIframe() {
+        var pdfContainer = document.getElementById('pdfContainer');
+        pdfContainer.innerHTML = '<iframe src="' + urlPDF + '#view=fitH" frameborder="0" allowfullscreen></iframe>';
+    }
 
-        function mostrarPDFConPDFJS() {
-            var pdfContainer = document.getElementById('pdfContainer');
-            pdfContainer.innerHTML = '';
-
-            pdfjsLib.getDocument(urlPDF).promise.then(function (pdf) {
-                for (var i = 1; i <= pdf.numPages; i++) {
-                    pdf.getPage(i).then(function (page) {
-                        var anchoVentana = window.innerWidth;
-                        var escala = anchoVentana / page.getViewport({ scale: 1 }).width;
-                        var viewport = page.getViewport({ scale: escala });
-                        var canvas = document.createElement('canvas');
-                        var context = canvas.getContext('2d');
-                        canvas.height = viewport.height;
-                        canvas.width = viewport.width;
-                        pdfContainer.appendChild(canvas);
-
-                        var renderContext = {
-                            canvasContext: context,
-                            viewport: viewport
-                        };
-                        page.render(renderContext).promise.then(function () {
-                            page.getAnnotations().then(function (annotations) {
-                                annotations.forEach(function (annotation) {
-                                    if (annotation.subtype === 'Link') {
-                                        var link = document.createElement('a');
-                                        link.href = annotation.url;
-                                        link.target = '_blank';
-                                        link.style.position = 'absolute';
-                                        link.style.left = annotation.rect[0] + 'px';
-                                        link.style.top = annotation.rect[1] + 'px';
-                                        link.style.width = annotation.rect[2] - annotation.rect[0] + 'px';
-                                        link.style.height = annotation.rect[3] - annotation.rect[1] + 'px';
-                                        pdfContainer.appendChild(link);
-                                    }
-                                });
-                            });
-                        });
-                    });
-                }
-            });
-        }
-
-        window.onload = cargarPDF;
-        window.onresize = cargarPDF;
-        window.addEventListener('orientationchange', cargarPDF);
-    </script>
+    window.onload = cargarPDF;
+    window.onresize = cargarPDF;
+    window.addEventListener('orientationchange', cargarPDF);
+</script>
 </body>
 </html>
