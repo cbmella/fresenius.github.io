@@ -5,80 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visualizador de PDF Ajustable</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.7.570/pdf.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        #pdfContainer {
+            width: 100%;
+            height: 100vh;
+        }
+        embed {
+            display: block;
+            border: none;
+        }
+    </style>
 </head>
 <body>
-    <div id="pdfContainer" style="width: 100%; overflow-x: auto;"></div>
+    <div id="pdfContainer"></div>
 
     <script>
         var urlPDF;
-        var pdfDoc;
-        var escala;
 
         function cargarPDF() {
             var anchoVentana = window.innerWidth;
+            var escala;
 
-            if(anchoVentana < 768) { // Móvil
+            if (anchoVentana < 768) { // Móvil
                 urlPDF = 'mobile.pdf';
                 escala = 0.6; // Ajusta esta escala según sea necesario para móviles
-            } else if(anchoVentana >= 768 && anchoVentana < 1024) { // Tableta
+            } else if (anchoVentana >= 768 && anchoVentana < 1024) { // Tableta
                 urlPDF = 'tablet.pdf';
                 escala = 1.0; // Ajusta esta escala según sea necesario para tabletas
             } else { // Escritorio
                 urlPDF = '01.pdf';
-                escala = 1.5; // Ajusta esta escala según sea necesario para escritorios
+                mostrarPDFEnEmbed();
+                return;
             }
 
-            pdfjsLib.getDocument({url: urlPDF}).promise.then(function(pdf) {
-                pdfDoc = pdf;
-                renderPage(1);
-            }).catch(function(error) {
+            pdfjsLib.getDocument({ url: urlPDF }).promise.then(function (pdfDoc) {
+                var pagesPromises = [];
+
+                for (var i = 1; i <= pdfDoc.numPages; i++) {
+                    pagesPromises.push(pdfDoc.getPage(i));
+                }
+
+                Promise.all(pagesPromises).then(function (pages) {
+                    var pdfContainer = document.getElementById('pdfContainer');
+                    pdfContainer.innerHTML = '';
+
+                    pages.forEach(function (page) {
+                        var viewport = page.getViewport({ scale: escala });
+                        var canvas = document.createElement('canvas');
+                        var ctx = canvas.getContext('2d');
+                        var renderContext = {
+                            canvasContext: ctx,
+                            viewport: viewport
+                        };
+
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+                        pdfContainer.appendChild(canvas);
+                        page.render(renderContext);
+                    });
+                });
+            }).catch(function (error) {
                 console.error('Error al cargar el PDF: ', error);
             });
         }
 
-        function renderPage(pageNumber) {
-            pdfDoc.getPage(pageNumber).then(function(page) {
-                var viewport = page.getViewport({scale: escala});
-                var canvas = document.createElement('canvas');
-                var ctx = canvas.getContext('2d');
-                var renderContext = {
-                    canvasContext: ctx,
-                    viewport: viewport,
-                    interactiveElements: true  // Habilita la interactividad
-                };
-
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-                document.getElementById('pdfContainer').innerHTML = '';
-                document.getElementById('pdfContainer').appendChild(canvas);
-                page.render(renderContext);
-
-                // Manejar los botones interactivos
-                page.getAnnotations().then(function(annotations) {
-                    annotations.forEach(function(annotation) {
-                        if (annotation.subtype === 'Link' && annotation.action && annotation.action.type === 'GoTo') {
-                            var pageRef = annotation.action.dest[0];
-                            if (pageRef.num) {
-                                // Ir a la página especificada al hacer clic en el botón
-                                canvas.addEventListener('click', function(event) {
-                                    var rect = canvas.getBoundingClientRect();
-                                    var x = (event.clientX - rect.left) * viewport.width / rect.width;
-                                    var y = (event.clientY - rect.top) * viewport.height / rect.height;
-                                    if (annotation.rect[0] <= x && annotation.rect[2] >= x && annotation.rect[1] <= y && annotation.rect[3] >= y) {
-                                        renderPage(pageRef.num);
-                                    }
-                                });
-                            }
-                        }
-                    });
-                });
-            });
+        function mostrarPDFEnEmbed() {
+            var pdfContainer = document.getElementById('pdfContainer');
+            pdfContainer.innerHTML = '<embed src="' + urlPDF + '" type="application/pdf" width="100%" height="100%" />';
         }
 
         window.onload = cargarPDF;
-        window.onresize = function() {
+        window.onresize = function () {
             document.getElementById('pdfContainer').innerHTML = ''; // Limpiar el contenedor
-            renderPage(1);
+            cargarPDF();
         };
     </script>
 </body>
