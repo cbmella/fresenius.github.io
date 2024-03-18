@@ -52,6 +52,24 @@
                         canvas.width = viewport.width;
                         pdfContainer.appendChild(canvas);
                         page.render(renderContext);
+
+                        // Agregar listener de eventos para los clics en los botones
+                        canvas.addEventListener('click', function(event) {
+                            // Convertir las coordenadas del clic a coordenadas del PDF
+                            var rect = canvas.getBoundingClientRect();
+                            var x = (event.clientX - rect.left) * viewport.width / rect.width;
+                            var y = (event.clientY - rect.top) * viewport.height / rect.height;
+
+                            // Encontrar anotaciones en las coordenadas del clic
+                            page.getAnnotations().then(function(annotations) {
+                                annotations.forEach(function(annotation) {
+                                    if (annotation.subtype === 'Link' && annotation.rect[0] <= x && annotation.rect[2] >= x && annotation.rect[1] <= y && annotation.rect[3] >= y) {
+                                        // Manejar el clic en el botón
+                                        console.log('Se hizo clic en un botón:', annotation);
+                                    }
+                                });
+                            });
+                        });
                     });
                 });
             }).catch(function(error) {
@@ -67,4 +85,3 @@
     </script>
 </body>
 </html>
-
