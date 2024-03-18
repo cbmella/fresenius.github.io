@@ -44,7 +44,8 @@
                         var ctx = canvas.getContext('2d');
                         var renderContext = {
                             canvasContext: ctx,
-                            viewport: viewport
+                            viewport: viewport,
+                            interactiveElements: true  // Habilita la interactividad
                         };
 
                         canvas.height = viewport.height;
