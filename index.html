@@ -9,19 +9,30 @@
         body {
             margin: 0;
             padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
         #pdfContainer {
             width: 100%;
-            height: 100vh;
+            max-width: 800px;
+            height: 100%;
+            max-height: 600px;
         }
-        iframe {
+        object {
             display: block;
-            border: none;
             width: 100%;
             height: 100%;
         }
         .hidden {
             display: none;
+        }
+        @media screen and (orientation: landscape) and (max-width: 1024px) {
+            #pdfContainer {
+                max-width: none;
+                max-height: none;
+            }
         }
     </style>
 </head>
@@ -43,7 +54,7 @@
                 escala = 1.0; // Ajusta esta escala según sea necesario para tabletas
             } else { // Escritorio
                 urlPDF = '01.pdf';
-                mostrarPDFEnIframe();
+                mostrarPDFEnObject();
                 return;
             }
 
@@ -82,9 +93,9 @@
             });
         }
 
-        function mostrarPDFEnIframe() {
+        function mostrarPDFEnObject() {
             var pdfContainer = document.getElementById('pdfContainer');
-            pdfContainer.innerHTML = '<iframe src="' + urlPDF + '#view=fitH" frameborder="0" allowfullscreen></iframe>';
+            pdfContainer.innerHTML = '<object data="' + urlPDF + '#view=fitH" type="application/pdf" width="100%" height="100%"><param name="toolbar" value="0"><param name="border" value="0"></object>';
         }
 
         window.onload = cargarPDF;
