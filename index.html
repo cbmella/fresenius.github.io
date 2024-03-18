@@ -36,13 +36,13 @@
             var escala;
 
             if (anchoVentana < 768) { // Móvil
-                urlPDF = 'mobile.pdf';
+                urlPDF = '01.pdf';
                 escala = 0.6; // Ajusta esta escala según sea necesario para móviles
             } else if (anchoVentana >= 768 && anchoVentana < 1024) { // Tableta
                 if (window.orientation === 0 || window.orientation === 180) { // Vertical
                     urlPDF = '01.pdf';
                 } else { // Horizontal
-                    urlPDF = '02.pdf';
+                    urlPDF = '01.pdf';
                 }
                 escala = 1.0; // Ajusta esta escala según sea necesario para tabletas
             } else { // Escritorio
