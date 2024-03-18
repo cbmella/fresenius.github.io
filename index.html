@@ -14,6 +14,9 @@
             width: 100%;
             height: 100vh;
         }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -49,9 +52,24 @@
                 baseUrl: 'https://unpkg.com/pspdfkit/dist/'
             }).then(function (instance) {
                 console.log('PSPDFKit loaded successfully!');
+                setTimeout(function() {
+                    ocultarElementosPorTexto('For Evaluation Purposes Only (remove with TRIAL key)');
+                }, 1000); // Retraso de 1 segundo (ajusta según sea necesario)
             }).catch(function (error) {
                 console.error(error.message);
             });
+        }
+
+        function ocultarElementosPorTexto(texto) {
+            var elementos = document.getElementsByTagName('*');
+
+            for (var i = 0; i < elementos.length; i++) {
+                var elemento = elementos[i];
+
+                if (elemento.textContent.includes(texto)) {
+                    elemento.classList.add('hidden');
+                }
+            }
         }
 
         window.onload = cargarPDF;
